@@ -27,7 +27,16 @@ services:
       traefik.http.routers.toa-mcp.tls: "true"
       traefik.http.routers.toa-mcp.tls.certresolver: cloudflare
       # Bearer auth is validated inside the app (Q5), not by a Traefik middleware.
-      traefik.http.routers.toa-mcp.middlewares: ratelimit@file,security-headers@file,compress@file
+      #
+      # toa-default@file is what AX41 actually defines and what 8 other routers
+      # use: a chain of toa-security (frameDeny, nosniff, XSS filter, referrer
+      # policy, X-Robots-Tag noindex, Server header stripped) and toa-ratelimit
+      # (100 avg / 50 burst per source IP).
+      #
+      # TRAEFIK_STANDARD_2026.md prescribes ratelimit@file, security-headers@file
+      # and compress@file. None of those three exist on AX41 — using them would
+      # leave the router unable to resolve its middlewares. See CATCH-UP item 22.
+      traefik.http.routers.toa-mcp.middlewares: toa-default@file
       traefik.http.services.toa-mcp.loadbalancer.server.port: "8000"
 
 networks:
