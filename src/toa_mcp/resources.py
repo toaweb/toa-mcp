@@ -133,10 +133,11 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
     def env_ax41() -> str:
         return loader.read_text("env", "ax41.md")
 
-    # ---- apps (static half only; live accent comes from get_app_profile) --
-    @mcp.resource("toa://apps/{app}/profile", title="App profile (static)", mime_type="text/markdown")
-    def app_profile(app: str) -> str:
-        return loader.read_text("apps", f"{app}.md")
+    # App profiles are exposed only through the get_app_profile tool, which reads
+    # live state from a TOA_APPS_PATH mount (Q4: read running truth, not a frozen
+    # file). There is no static toa://apps/{app}/profile resource — the apps/
+    # directory in the data layer was never populated, so the template resolved
+    # to nothing for every app.
 
     # ---- meta ------------------------------------------------------------
     @mcp.resource("toa://meta/catch-up", title="Known catch-up debt", mime_type="text/markdown")
