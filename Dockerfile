@@ -13,11 +13,15 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
 COPY pyproject.toml uv.lock* ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev 2>/dev/null \
-    || uv sync --no-install-project --no-dev
+    uv sync --frozen --no-install-project --no-dev --no-editable 2>/dev/null \
+    || uv sync --no-install-project --no-dev --no-editable
 
 COPY src ./src
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --no-dev
+# --no-editable matters: the default editable install writes a .pth pointing at
+# /build/src, which does not exist in the runner stage. Copying the venv across
+# stages then yields ModuleNotFoundError. --no-editable installs the package
+# into site-packages so the venv is relocatable.
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --no-dev --no-editable
 
 # ---------------------------------------------------------------------------
 FROM python:3.12-slim-bookworm AS runner
