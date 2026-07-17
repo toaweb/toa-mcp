@@ -1,0 +1,40 @@
+services:
+  toa-mcp:
+    build: .
+    image: toa-mcp:0.1.0
+    container_name: toa-mcp
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      TOA_RULES_PATH: /srv/toa-rules
+      TOA_APPS_PATH: /srv/apps
+    volumes:
+      # The data layer, read-only. Kept outside the image so a rule change is a
+      # git pull in toa-rules, not a rebuild.
+      - ${TOA_RULES_HOST_PATH:?set TOA_RULES_HOST_PATH in .env}:/srv/toa-rules:ro
+      # The apps checkout, read-only. Feeds get_app_profile's live accent read.
+      # Read-only mount rather than a submodule: a submodule pins a commit, and a
+      # pinned commit freezes the very profile this tool exists to read live.
+      - ${TOA_APPS_HOST_PATH:?set TOA_APPS_HOST_PATH in .env}:/srv/apps:ro
+    networks: [proxy]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: ["/tmp"]
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512M }
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: proxy
+      traefik.http.routers.toa-mcp.rule: Host(`mcp.toaweb.com`)
+      traefik.http.routers.toa-mcp.entrypoints: websecure
+      traefik.http.routers.toa-mcp.tls: "true"
+      traefik.http.routers.toa-mcp.tls.certresolver: cloudflare
+      # Bearer auth is validated inside the app (Q5), not by a Traefik middleware.
+      traefik.http.routers.toa-mcp.middlewares: ratelimit@file,security-headers@file,compress@file
+      traefik.http.services.toa-mcp.loadbalancer.server.port: "8000"
+
+networks:
+  proxy:
+    external: true
