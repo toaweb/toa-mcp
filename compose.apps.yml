@@ -1,0 +1,25 @@
+# Optional overlay: mount an apps checkout read-only so get_app_profile can read
+# each app's live accent instead of trusting AGENTS.md.
+#
+#   docker compose -f compose.yml -f compose.apps.yml up -d
+#
+# Deliberately NOT part of compose.yml, and deliberately not pointed at
+# ~/docker on AX41. That directory has the right layout — every app has
+# frontend/app/assets/css/theme/tokens.css — but it also holds 15 .env files,
+# including traefik/.env with the Cloudflare API token. Mounting it would give
+# an internet-facing process read access to every secret on the box in exchange
+# for one tool. get_app_profile only ever reads four known filenames and has a
+# path-traversal guard, so it would not read them — but "would not" is not
+# "cannot", and the trade is bad.
+#
+# Point TOA_APPS_HOST_PATH at a checkout that contains app SOURCE and no
+# deployment secrets — e.g. a clone of the app repos under ~/projects/apps.
+# Without this overlay the server runs fine and get_app_profile fails with an
+# explanation rather than silently returning nothing.
+
+services:
+  toa-mcp:
+    environment:
+      TOA_APPS_PATH: /srv/apps
+    volumes:
+      - ${TOA_APPS_HOST_PATH:?set TOA_APPS_HOST_PATH — must be a source checkout without .env files}:/srv/apps:ro

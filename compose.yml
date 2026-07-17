@@ -7,15 +7,10 @@ services:
     env_file: .env
     environment:
       TOA_RULES_PATH: /srv/toa-rules
-      TOA_APPS_PATH: /srv/apps
     volumes:
       # The data layer, read-only. Kept outside the image so a rule change is a
       # git pull in toa-rules, not a rebuild.
       - ${TOA_RULES_HOST_PATH:?set TOA_RULES_HOST_PATH in .env}:/srv/toa-rules:ro
-      # The apps checkout, read-only. Feeds get_app_profile's live accent read.
-      # Read-only mount rather than a submodule: a submodule pins a commit, and a
-      # pinned commit freezes the very profile this tool exists to read live.
-      - ${TOA_APPS_HOST_PATH:?set TOA_APPS_HOST_PATH in .env}:/srv/apps:ro
     networks: [proxy]
     security_opt: ["no-new-privileges:true"]
     cap_drop: [ALL]
