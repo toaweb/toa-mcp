@@ -59,8 +59,7 @@ def register(mcp: FastMCP, loader: RulesLoader, settings: Settings | None = None
         description=(
             "Resolve an app's ACTUAL accent by reading its tokens.css and data-theme at "
             "call time — not its AGENTS.md metadata, which is wrong for 3 of 3 apps "
-            "checked. The static half (path, domain, containers) is at "
-            "toa://apps/{app}/profile. Requires the apps checkout mounted read-only."
+            "checked. Requires the apps checkout mounted read-only via TOA_APPS_PATH."
         ),
     )
     def get_app_profile(app: str) -> dict:
@@ -70,14 +69,13 @@ def register(mcp: FastMCP, loader: RulesLoader, settings: Settings | None = None
                 "get_app_profile needs the apps checkout mounted read-only, but "
                 "TOA_APPS_PATH is not set. Set it to the apps checkout and mount that "
                 "path read-only into the container. Without it this tool cannot read "
-                "live state, and the static half of the profile is still available at "
-                f"toa://apps/{app}/profile."
+                "live state."
             )
         if not root.is_dir():
             raise ValueError(
                 f"TOA_APPS_PATH is set to {root} but that directory is not present. "
                 "On AX41 this is the read-only mount; locally it is often absent — "
-                f"unset TOA_APPS_PATH to disable this tool, or use toa://apps/{app}/profile."
+                "unset TOA_APPS_PATH to disable this tool."
             )
 
         app_dir = (root / app).resolve()
