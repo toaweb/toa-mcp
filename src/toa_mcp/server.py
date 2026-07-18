@@ -32,12 +32,13 @@ def build_mcp(loader: RulesLoader, settings: Settings) -> FastMCP:
         log_level=settings.mcp_log_level,
     )
 
-    from toa_mcp import prompts, resources
+    from toa_mcp import gf, prompts, resources
     from toa_mcp.tools import register_all as register_tools
 
     resources.register(mcp, loader)
     register_tools(mcp, loader, settings)
     prompts.register(mcp, loader)
+    gf.register(mcp, loader)  # gf:// — GamingForge, separate namespace
     return mcp
 
 
