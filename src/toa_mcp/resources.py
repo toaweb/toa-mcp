@@ -120,6 +120,14 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
             "stale": gaps["stale"],
         }
 
+    @mcp.resource("toa://design/styles", title="2026 web design styles", mime_type="text/markdown")
+    def design_styles() -> str:
+        return loader.read_text("design", "styles.md")
+
+    @mcp.resource("toa://design/styles/index", title="Design styles index", mime_type="application/json")
+    def design_styles_index() -> dict:
+        return loader.read_json("design", "styles-index.json")
+
     @mcp.resource("toa://design/components/index", title="Component index", mime_type="application/json")
     def components_index() -> dict:
         return loader.manifest().get("components", {})
