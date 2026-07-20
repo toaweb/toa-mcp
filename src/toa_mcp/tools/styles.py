@@ -65,12 +65,22 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
                     break
             card = (marker + after).rstrip()
 
+        # A style may ship a depth guide — the full working reference behind the
+        # one-card summary. Load it inline so the agent has it in the same call,
+        # rather than a pointer it has to chase (and may not reach headless).
+        guide = None
+        guide_path = match.get("guide")
+        if guide_path:
+            guide = loader.read_text("design", *guide_path.split("/"))
+
         return {
             "key": match["key"],
             "id": match["id"],
             "name": match["name"],
             "card": card,
+            "guide": guide,
             "universalRules": idx.get("universalRules"),
-            "note": "Apply universalRules to every style. Cross-cutting techniques + "
-            "full context: toa://design/styles.",
+            "note": "Apply universalRules to every style. The card is the summary; "
+            "when a guide is present it is the full working reference — design to it. "
+            "Cross-cutting techniques + full context: toa://design/styles.",
         }
