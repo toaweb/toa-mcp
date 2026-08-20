@@ -127,7 +127,9 @@ def build(store: Content) -> FastMCP:
                 f"unknown brand {brand!r}. Valid brands: {', '.join(sorted(C.BRANDS))}"
             )
         subdir, fname = C.BRANDS[brand]
-        return Brand(brand=brand, data=store.read_json(subdir, fname))
+        # subdir may be nested ("gf/design") — split so path never escapes via a single segment
+        parts = tuple(p for p in subdir.split("/") if p) + (fname,)
+        return Brand(brand=brand, data=store.read_json(*parts))
 
     @mcp.tool(annotations=RO, title="Get token scale",
               description="Non-color token CSS: radius, shadows, or spacing.")
@@ -148,7 +150,8 @@ def build(store: Content) -> FastMCP:
             note=(
                 "When the user names an aesthetic, read the skill definition in full, "
                 "then apply brand via get_brand / get_token_scale. "
-                "Product UI behind login → product-ux skill, not this catalogue."
+                "Product UI behind login → product-ux skill, not this catalogue. "
+                "Ignore legacy design/styles* under toa-rules — toa-agents is canonical."
             ),
         )
 
