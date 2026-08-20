@@ -7,8 +7,8 @@ wiring, brand tokens, and markup checks. **Named design styles** (brutalist,
 Y2K, …) live in [toa-agents](https://github.com/toaweb/toa-agents)
 (`design-styles` skill) — not in this server.
 
-This is the successor to the old fat HTTP server and to **toa-mcp2** (same
-minimal surface, package renamed to `toa-mcp`).
+Successor to the old fat HTTP server and to **[toa-mcp2](https://github.com/toaweb/toa-mcp2)**
+(same minimal surface; package renamed to `toa-mcp`). See [MIGRATION.md](./MIGRATION.md).
 
 ## Scope
 
@@ -31,10 +31,10 @@ export TOA_RULES_HOME=~/projects/toa-rules   # or TOA_RULES_PATH
 
 cd toa-mcp
 uv sync
-uv run toa-mcp          # stdio — default for Claude Code / Codex
+uv run toa-mcp          # stdio — default for Claude Code / Codex / Grok Build
 ```
 
-Claude MCP config example:
+Claude / MCP client config example:
 
 ```json
 {
@@ -66,10 +66,12 @@ Claude MCP config example:
 
 ```
 src/toa_mcp/
-  content.py   # explicit maps + Content loader
-  models.py    # Pydantic return types
-  server.py    # FastMCP tools + stdio entry
+  content.py      # explicit maps + Content loader
+  models.py       # Pydantic return types
+  server.py       # stdio entry
+  tools_impl.py   # FastMCP tool registration
 evals/eval.xml
+MIGRATION.md
 ```
 
 ## Adding content
@@ -79,4 +81,4 @@ scanning — a missing map entry is intentional.
 
 ## License
 
-Same as the toaweb org defaults for this repo.
+Same as the toaweb account defaults for this repo.
