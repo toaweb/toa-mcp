@@ -1,18 +1,15 @@
 [project]
 name = "toa-mcp"
-version = "0.1.0"
-description = "toa-rules MCP server — a thin reader over the toa-rules data layer"
+version = "0.2.0"
+description = "Minimal toa-rules MCP server: standards, infra wiring, brand tokens over TOA_RULES_HOME. Design styles live in toa-agents."
 requires-python = ">=3.12"
 dependencies = [
-    # 2.0 is in beta and will break the API surface — pin below it deliberately.
     "mcp>=1.28.1,<2",
-    "pydantic-settings>=2.7",
-    "starlette>=0.41",
-    "uvicorn>=0.34",
+    "pydantic>=2",
 ]
 
-[dependency-groups]
-dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8", "mypy>=1.13"]
+[project.scripts]
+toa-mcp = "toa_mcp.server:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -25,5 +22,6 @@ packages = ["src/toa_mcp"]
 line-length = 100
 target-version = "py312"
 
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "basic"
