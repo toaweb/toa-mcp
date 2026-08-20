@@ -57,9 +57,19 @@ class Brand(BaseModel):
     data: dict[str, Any]
 
 
+class BrandList(BaseModel):
+    count: int
+    brands: list[str]
+
+
 class TokenScale(BaseModel):
     name: str
     css: str
+
+
+class TokenScaleList(BaseModel):
+    count: int
+    scales: list[str]
 
 
 class Finding(BaseModel):

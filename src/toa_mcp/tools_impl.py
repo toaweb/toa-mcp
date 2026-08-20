@@ -11,6 +11,7 @@ from toa_mcp.content import Content, first_heading
 from toa_mcp.models import (
     AppList,
     Brand,
+    BrandList,
     DesignStylesPointer,
     EnvDoc,
     Finding,
@@ -21,6 +22,7 @@ from toa_mcp.models import (
     StandardSummary,
     TaskRouting,
     TokenScale,
+    TokenScaleList,
     ValidationResult,
 )
 
@@ -119,6 +121,12 @@ def build(store: Content) -> FastMCP:
             raise ValueError(f"unknown host {host!r}. Valid hosts: {', '.join(sorted(C.ENV))}")
         return EnvDoc(host=host, content=store.read_text("env", C.ENV[host]))
 
+    @mcp.tool(annotations=RO, title="List brands",
+              description="List every brand key served by get_brand.")
+    def list_brands() -> BrandList:
+        keys = sorted(C.BRANDS)
+        return BrandList(count=len(keys), brands=keys)
+
     @mcp.tool(annotations=RO, title="Get brand tokens",
               description="Canonical brand JSON for toaweb or gamingforge.")
     def get_brand(brand: str) -> Brand:
@@ -130,6 +138,12 @@ def build(store: Content) -> FastMCP:
         # subdir may be nested ("gf/design") — split so path never escapes via a single segment
         parts = tuple(p for p in subdir.split("/") if p) + (fname,)
         return Brand(brand=brand, data=store.read_json(*parts))
+
+    @mcp.tool(annotations=RO, title="List token scales",
+              description="List non-colour token scales (radius, shadows, spacing).")
+    def list_token_scales() -> TokenScaleList:
+        keys = sorted(C.TOKEN_SCALES)
+        return TokenScaleList(count=len(keys), scales=keys)
 
     @mcp.tool(annotations=RO, title="Get token scale",
               description="Non-color token CSS: radius, shadows, or spacing.")

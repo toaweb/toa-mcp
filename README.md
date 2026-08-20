@@ -7,7 +7,7 @@ wiring, brand tokens, and markup checks. **Named design styles** (brutalist,
 Y2K, …) live in [toa-agents](https://github.com/toaweb/toa-agents)
 (`design-styles` skill) — not in this server.
 
-Successor to the old fat HTTP server and to **[toa-mcp2](https://github.com/toaweb/toa-mcp2)**
+Successor to the old fat HTTP server and to **toa-mcp2**
 (same minimal surface; package renamed to `toa-mcp`). See [MIGRATION.md](./MIGRATION.md).
 
 ## Scope
@@ -57,8 +57,8 @@ Claude / MCP client config example:
 | `get_standards_for_task` | Route a task string via `_routing.md` |
 | `list_apps` / `get_infra_profile` | App wiring |
 | `get_env` | Host facts (e.g. `ax41`) |
-| `get_brand` | `toaweb` or `gamingforge` brand JSON |
-| `get_token_scale` | `radius` \| `shadows` \| `spacing` CSS |
+| `list_brands` / `get_brand` | `toaweb` or `gamingforge` brand JSON |
+| `list_token_scales` / `get_token_scale` | `radius` \| `shadows` \| `spacing` CSS |
 | `validate_usage` | Raw hex / inline style / arbitrary colors |
 | `design_styles_info` | Pointer to toa-agents 14 styles |
 

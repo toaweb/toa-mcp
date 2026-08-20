@@ -16,7 +16,7 @@ from typing import Any
 
 # --- explicit maps -----------------------------------------------------------
 
-# key -> filename under standards/  (22 canonical + tone, shipped day one)
+# key -> filename under standards/  (23 registered, including tone)
 STANDARDS: dict[str, str] = {
     "app-config": "APP_CONFIG_STANDARD_2026.md",
     "astro": "ASTRO_STANDARD_2026.md",
@@ -68,7 +68,7 @@ BRANDS: dict[str, tuple[str, str]] = {
     "gamingforge": ("gf/design", "brand.json"),
 }
 
-# token scale -> css file under design/tokens/  (audit-verified CURRENT set only)
+# token scale -> css file under design/tokens/  (non-colour scales; colours via get_brand)
 TOKEN_SCALES: dict[str, str] = {
     "radius": "radius.css",
     "shadows": "shadows.css",
