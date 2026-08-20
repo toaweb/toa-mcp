@@ -3,31 +3,7 @@
 from mcp.server.fastmcp import FastMCP
 
 from toa_mcp.loader import RulesLoader
-
-_STANDARD_FILES = {
-    "app-config": "APP_CONFIG_STANDARD_2026.md",
-    "astro": "ASTRO_STANDARD_2026.md",
-    "dependencies": "DEPENDENCIES_2026.md",
-    "deployment-strategy": "DEPLOYMENT_STRATEGY_2026.md",
-    "docker": "DOCKER_STANDARD_2026.md",
-    "fastapi": "FASTAPI_STANDARD_2026.md",
-    "favicon": "FAVICON_STANDARD_2026.md",
-    "fonts": "FONTS_STANDARD_2026.md",
-    "gallery": "GALLERY_STANDARD_2026.md",
-    "git": "GIT_STANDARD_2026.md",
-    "hugo": "HUGO_STANDARD_2026.md",
-    "image": "IMAGE_STANDARD_2026.md",
-    "mobile": "MOBILE_STANDARD_2026.md",
-    "n8n": "N8N_STANDARD_2026.md",
-    "nuxt-fastapi": "NUXT_FASTAPI_STANDARD_2026.md",
-    "nuxt-vue": "NUXT_VUE_STANDARD_2026.md",
-    "postgresql": "POSTGRESQL_STANDARD_2026.md",
-    "seo": "SEO_STANDARD_2026.md",
-    "stack-selection": "STACK_SELECTION_2026.md",
-    "tailwind": "TAILWIND_STANDARD_2026.md",
-    "traefik": "TRAEFIK_STANDARD_2026.md",
-    "versioning": "VERSIONING_STANDARD_2026.md",
-}
+from toa_mcp.maps import STANDARDS
 
 _TOKEN_FILES = ("colors", "fonts", "primitives", "radius", "shadows", "spacing", "typography")
 
@@ -37,22 +13,22 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
     @mcp.resource(
         "toa://standards/{name}",
         title="toa standard",
-        description=f"One of the {len(_STANDARD_FILES)} canonical standards. Names: "
-        + ", ".join(sorted(_STANDARD_FILES)),
+        description=f"One of the {len(STANDARDS)} canonical standards. Names: "
+        + ", ".join(sorted(STANDARDS)),
         mime_type="text/markdown",
     )
     def standard(name: str) -> str:
         try:
-            filename = _STANDARD_FILES[name]
+            filename = STANDARDS[name]
         except KeyError:
             raise ValueError(
-                f"unknown standard {name!r}. Known: {', '.join(sorted(_STANDARD_FILES))}"
+                f"unknown standard {name!r}. Known: {', '.join(sorted(STANDARDS))}"
             ) from None
         return loader.read_text("standards", filename)
 
     @mcp.resource("toa://standards/index", title="Standards index", mime_type="application/json")
     def standards_index() -> dict:
-        return {"standards": sorted(_STANDARD_FILES), "routing": "use get_standards_for_task()"}
+        return {"standards": sorted(STANDARDS), "routing": "use get_standards_for_task()"}
 
     # ---- rules -----------------------------------------------------------
     @mcp.resource("toa://rules/git", title="Git rules", mime_type="text/markdown")

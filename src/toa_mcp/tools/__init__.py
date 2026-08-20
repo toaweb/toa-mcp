@@ -11,7 +11,7 @@ from mcp.server.fastmcp import FastMCP
 
 from toa_mcp.loader import RulesLoader
 from toa_mcp.settings import Settings
-from toa_mcp.tools import adherence, brand, components, figma, icons, standards, styles
+from toa_mcp.tools import adherence, brand, components, figma, icons, infra, standards, styles
 
 
 def register_all(mcp: FastMCP, loader: RulesLoader, settings: Settings) -> None:
@@ -20,5 +20,6 @@ def register_all(mcp: FastMCP, loader: RulesLoader, settings: Settings) -> None:
     figma.register(mcp, loader)
     adherence.register(mcp, loader)
     brand.register(mcp, loader, settings)
+    infra.register(mcp, loader)
     standards.register(mcp, loader)
     styles.register(mcp, loader)

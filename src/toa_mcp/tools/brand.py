@@ -9,12 +9,15 @@ commit is a frozen profile, i.e. the same failure in a new place.
 """
 
 import re
-from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 
 from toa_mcp.loader import RulesLoader
+from toa_mcp.maps import BRANDS, TOKEN_SCALES
 from toa_mcp.settings import Settings
+
+RO = ToolAnnotations(readOnlyHint=True)
 
 _DATA_THEME = re.compile(r"""data-theme["']?\s*[:=]\s*["']([a-z-]+)["']""")
 _ACCENT_DECL = re.compile(r"--app-accent:\s*([^;]+);")
@@ -30,10 +33,27 @@ _BLOCK = re.compile(r"([^{}]*?)\{([^{}]*?)\}", re.S)
 _MODE_QUALIFIED = re.compile(r"\[data-mode=")
 
 
+def get_brand_payload(loader: RulesLoader, brand: str) -> dict:
+    if brand not in BRANDS:
+        raise ValueError(
+            f"unknown brand {brand!r}. Valid brands: {', '.join(sorted(BRANDS))}"
+        )
+    return {"brand": brand, "data": loader.read_json(*BRANDS[brand])}
+
+
+def get_token_scale_payload(loader: RulesLoader, name: str) -> dict:
+    if name not in TOKEN_SCALES:
+        raise ValueError(
+            f"unknown token scale {name!r}. Valid: {', '.join(sorted(TOKEN_SCALES))}"
+        )
+    return {"name": name, "css": loader.read_text("design", "tokens", TOKEN_SCALES[name])}
+
+
 def register(mcp: FastMCP, loader: RulesLoader, settings: Settings | None = None) -> None:
     settings = settings or Settings()  # type: ignore[call-arg]
 
     @mcp.tool(
+        annotations=RO,
         title="Canonical brand colour",
         description="Resolve a role (primary|secondary|canvas|success|warning) or a "
         "category (portal|gaming|auth|infra|tools) against toa://design/brand.",
@@ -55,6 +75,23 @@ def register(mcp: FastMCP, loader: RulesLoader, settings: Settings | None = None
         raise ValueError(f"unknown role {role!r}")
 
     @mcp.tool(
+        annotations=RO,
+        title="Get brand tokens",
+        description="Fetch the canonical brand JSON for 'toaweb' or 'gamingforge'.",
+    )
+    def get_brand(brand: str) -> dict:
+        return get_brand_payload(loader, brand)
+
+    @mcp.tool(
+        annotations=RO,
+        title="Get token scale",
+        description="Fetch a non-color token scale CSS file: 'radius', 'shadows', or 'spacing'.",
+    )
+    def get_token_scale(name: str) -> dict:
+        return get_token_scale_payload(loader, name)
+
+    @mcp.tool(
+        annotations=RO,
         title="Live app profile",
         description=(
             "Resolve an app's ACTUAL accent by reading its tokens.css and data-theme at "
