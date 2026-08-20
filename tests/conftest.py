@@ -21,7 +21,7 @@ def _rules_root() -> Path:
 def rules_path() -> Path:
     root = _rules_root()
     if not (root / "standards" / "TONE_STANDARD_2026.md").is_file():
-        pytest.skip(f"toa-rules checkout not found at {root}")
+        pytest.fail(f"toa-rules checkout not found at {root} (set TOA_RULES_PATH)")
     return root
 
 

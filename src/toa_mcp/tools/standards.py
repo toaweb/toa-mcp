@@ -18,23 +18,29 @@ def list_standards_payload(loader: RulesLoader) -> dict:
 
 
 def get_standard_payload(
-    loader: RulesLoader, name: str, section: str | None = None
+    loader: RulesLoader,
+    name: str | None = None,
+    key: str | None = None,
+    section: str | None = None,
 ) -> dict:
-    if name not in STANDARDS:
+    ident = key or name
+    if not ident:
         raise ValueError(
-            f"unknown standard {name!r}. Known: {', '.join(sorted(STANDARDS))}"
+            f"pass name= or key=. Valid keys: {', '.join(sorted(STANDARDS))}"
         )
-    text = loader.read_text("standards", STANDARDS[name])
+    if ident not in STANDARDS:
+        raise ValueError(
+            f"unknown standard {ident!r}. Valid keys: {', '.join(sorted(STANDARDS))}"
+        )
+    text = loader.read_text("standards", STANDARDS[ident])
     if section is None:
-        return {"standard": name, "content": text, "lines": len(text.splitlines())}
+        return {"standard": ident, "content": text, "lines": len(text.splitlines())}
     for block in text.split("\n## "):
-        if section.lower() in block.split("\n", 1)[0].lower():
-            return {
-                "standard": name,
-                "section": block.split("\n", 1)[0].strip(),
-                "content": "## " + block,
-            }
-    raise ValueError(f"section {section!r} not found in {name}")
+        head = block.split("\n", 1)[0].strip()
+        if section.lower() in head.lower():
+            body = block if block.startswith("#") else "## " + block
+            return {"standard": ident, "section": head, "content": body}
+    raise ValueError(f"section {section!r} not found in {ident}")
 
 
 def get_standards_for_task_payload(loader: RulesLoader, task: str) -> dict:
@@ -44,6 +50,7 @@ def get_standards_for_task_payload(loader: RulesLoader, task: str) -> dict:
         "task": task,
         "matched": len(cats),
         "categories": cats,
+        "sections": cats or None,  # v1 alias
         "hint": None if cats else "No category matched — call list_standards().",
         "fallback": "toa://standards/index" if not cats else None,
     }
@@ -62,7 +69,7 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
         annotations=RO,
         title="Which standards apply to this task",
         description="Map a task description to the standards that govern it. "
-        "Backed by standards/_routing.md (16 task categories).",
+        "Backed by standards/_routing.md.",
     )
     def get_standards_for_task(task: str) -> dict:
         return get_standards_for_task_payload(loader, task)
@@ -70,8 +77,13 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
     @mcp.tool(
         annotations=RO,
         title="Read a standard, optionally one section",
-        description="Fetch a standard by name. Pass `section` to extract a single "
-        "heading instead of the whole 200-600 line document.",
+        description="Fetch a standard by name or key (same identifier list_standards "
+        "returns). Pass `section` to extract a single heading instead of the whole "
+        "200-600 line document.",
     )
-    def get_standard(name: str, section: str | None = None) -> dict:
-        return get_standard_payload(loader, name, section)
+    def get_standard(
+        name: str | None = None,
+        key: str | None = None,
+        section: str | None = None,
+    ) -> dict:
+        return get_standard_payload(loader, name=name, key=key, section=section)

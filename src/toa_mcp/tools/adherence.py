@@ -4,7 +4,7 @@ Rebuilt for ui-kit. toafigma's _adherence.oxlintrc.json cannot be reused: it enc
 React prop names (iconLeft, color) that do not exist on the Astro components
 (leadingIconName, tone). Reusing it would validate against the wrong API.
 
-Font-family checks are out of scope — the canonical type set is not yet served.
+The Inter / IBM Plex font allowlist was pre-rebrand and has been removed.
 """
 
 import re
@@ -54,8 +54,8 @@ def register(mcp: FastMCP, loader: RulesLoader) -> None:
         title="Validate code against the toa design system",
         description=(
             "Check markup for design-system violations: raw hex, inline style, "
-            "arbitrary-value colours, <style> blocks. Font-family checks are out of "
-            "scope — the canonical type set is not yet served. "
+            "arbitrary-value colours, <style> blocks. The pre-rebrand Inter/IBM Plex "
+            "font allowlist has been removed. "
             "Implements TAILWIND_STANDARD_2026 §Verifisering."
         ),
     )

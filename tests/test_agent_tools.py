@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from toa_mcp.loader import RulesLoader
 from toa_mcp.maps import APPS, STANDARDS, first_heading, route_task
 from toa_mcp.tools.adherence import check_usage
 from toa_mcp.tools.brand import get_brand_payload, get_token_scale_payload
@@ -33,8 +34,15 @@ def test_get_standard_tone(loader):
 
 
 def test_get_standard_unknown(loader):
-    with pytest.raises(ValueError, match=r"(Valid keys:|Known:)"):
+    with pytest.raises(ValueError, match=r"Valid keys:") as exc:
         get_standard_payload(loader, "nope")
+    assert "tone" in str(exc.value)
+
+
+def test_get_standard_accepts_key_alias(loader):
+    by_name = get_standard_payload(loader, name="tone")
+    by_key = get_standard_payload(loader, key="tone")
+    assert by_name["content"] == by_key["content"]
 
 
 def test_list_apps():
@@ -87,18 +95,56 @@ def test_get_token_scale_unknown(loader):
     assert "spacing" in str(exc.value)
 
 
+def test_unknown_app_host_brand_list_valid(loader):
+    with pytest.raises(ValueError, match=r"Valid apps:.*toaweb"):
+        get_infra_profile_payload(loader, "nope")
+    with pytest.raises(ValueError, match=r"Valid hosts:.*ax41"):
+        get_env_payload(loader, "nope")
+    with pytest.raises(ValueError, match=r"Valid brands:.*toaweb"):
+        get_brand_payload(loader, "nope")
+
+
 def test_get_standards_for_task_deploy(loader):
     payload = get_standards_for_task_payload(loader, "deploy docker traefik container")
     assert payload["matched"] >= 1
     categories = [c["category"] for c in payload["categories"]]
     assert any("Docker, Traefik, VPS, Deploy" in cat for cat in categories)
     assert payload["hint"] is None
+    assert payload["sections"] == payload["categories"]
 
 
 def test_route_task_ignores_stopwords(loader):
     routing = loader.read_text("standards", "_routing.md")
     cats = route_task("and for the", routing)
     assert not any("Priority And Safety" in c["category"] for c in cats)
+
+
+async def test_mcp_registers_and_calls_new_tools(rules_path):
+    from toa_mcp.server import build_mcp
+    from toa_mcp.settings import Settings
+
+    settings = Settings(rules_path=rules_path, mcp_token="t" * 32)
+    mcp = build_mcp(RulesLoader(rules_path), settings)
+    tools = {t.name for t in await mcp.list_tools()}
+    expected = {
+        "list_standards",
+        "list_apps",
+        "get_infra_profile",
+        "get_env",
+        "get_brand",
+        "get_token_scale",
+        "list_design_styles",
+        "get_design_style",
+        "get_standard",
+        "get_standards_for_task",
+        "validate_usage",
+        "verify_tailwind",
+        "brand_color",
+        "get_app_profile",
+    }
+    assert expected <= tools
+    result = await mcp.call_tool("list_standards", {})
+    assert result is not None
 
 
 def test_validate_usage_flags_hex_not_font():
