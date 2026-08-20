@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  toa-mcp evaluation set — 10 read-only, independent, string-verifiable pairs.
+  Verified against toa-rules content (stdio).
+-->
+<evals server="toa-mcp" transport="stdio" verified="2026-08-20">
+
+  <eval id="1" tools="list_standards">
+    <question>How many standards does toa-mcp serve?</question>
+    <call tool="list_standards"/>
+    <expect field="count" equals="23"/>
+  </eval>
+
+  <eval id="2" tools="get_standard">
+    <question>What is the title (first heading) of the tone standard?</question>
+    <call tool="get_standard"><arg name="key">tone</arg></call>
+    <expect field="title" equals="Tekst & tone — Prosjektstandard 2026"/>
+  </eval>
+
+  <eval id="3" tools="get_brand">
+    <question>What is the toaweb brand primary colour?</question>
+    <call tool="get_brand"><arg name="brand">toaweb</arg></call>
+    <expect path="data.brand.primary" equals="#FF4E43"/>
+  </eval>
+
+  <eval id="4" tools="get_brand">
+    <question>What is the GamingForge primary accent (ember)?</question>
+    <call tool="get_brand"><arg name="brand">gamingforge</arg></call>
+    <expect path="data.accent.primary" equals="#F05A28"/>
+  </eval>
+
+  <eval id="5" tools="list_apps">
+    <question>How many apps have infra profiles, and are n8n and toaweb among them?</question>
+    <call tool="list_apps"/>
+    <expect field="count" equals="10"/>
+    <expect field="apps" contains="n8n"/>
+    <expect field="apps" contains="toaweb"/>
+  </eval>
+
+  <eval id="6" tools="get_infra_profile">
+    <question>How is toaweb.com deployed — container or hosted?</question>
+    <call tool="get_infra_profile"><arg name="app">toaweb</arg></call>
+    <expect field="content" contains="Cloudflare Pages"/>
+    <expect field="content" contains="No Docker container"/>
+  </eval>
+
+  <eval id="7" tools="get_standard">
+    <question>Does the FAVICON standard, AS SERVED, still contain the old canvas hex #04070E?</question>
+    <call tool="get_standard"><arg name="key">favicon</arg></call>
+    <expect field="content" not_contains="#04070E"/>
+    <expect field="content" not_contains="#2DD4BF"/>
+  </eval>
+
+  <eval id="8" tools="get_standard">
+    <question>What does a bad standard key return?</question>
+    <call tool="get_standard"><arg name="key">nope</arg></call>
+    <expect error="true" contains="unknown standard 'nope'. Valid keys:"/>
+  </eval>
+
+  <eval id="9" tools="get_standards_for_task">
+    <question>Which routing category governs a docker/traefik/deploy task?</question>
+    <call tool="get_standards_for_task"><arg name="task">deploy docker traefik container</arg></call>
+    <expect path="categories[].category" contains="Docker, Traefik, VPS, Deploy"/>
+  </eval>
+
+  <eval id="10" tools="get_standard,get_brand" type="cross-tool">
+    <question>Which accent token does toabackup's favicon use, and which hex does it resolve to today?</question>
+    <call tool="get_standard"><arg name="key">favicon</arg></call>
+    <expect field="content" contains="toabackup"/>
+    <expect field="content" contains="categories.auth"/>
+    <call tool="get_brand"><arg name="brand">toaweb</arg></call>
+    <expect path="data.categories.auth" equals="#A855F7"/>
+    <answer>Token: categories.auth. Resolves to #A855F7 (from get_brand("toaweb").data.categories.auth).</answer>
+  </eval>
+
+</evals>
